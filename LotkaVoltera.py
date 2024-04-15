@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from SimulationConfig import Config
+
 
 def generateModelPlot(preys, predators) -> None:
     plt.figure()
@@ -17,10 +19,10 @@ def lotka_volterra(x, y, length):
     xs = [x]  # preys
     ys = [y]  # predators
 
-    alpha = 0.03  # natural growth rate of preys
-    beta = 0.001  # death rate per encounter of preys due to predation
-    gamma = 0.001  # natural growth rate of predators
-    delta = 0.05  # natural death rate of predators in the absence of food
+    alpha = Config.alpha  # natural growth rate of preys
+    beta = Config.beta  # death rate per encounter of preys due to predation
+    gamma = Config.gamma  # natural growth rate of predators
+    delta = Config.delta  # natural death rate of predators in the absence of food
 
     timestep = 0.01
 

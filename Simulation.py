@@ -1,11 +1,11 @@
 import numpy as np
-
-from ExtractInfo import ExtractInfo
 import argparse
 import random
-from GrassAgent import *
-from GP_Agents import Prey, Predator
+
 from matplotlib import pyplot as plt
+
+from GP_Agents import Prey, Predator
+from SimulationConfig import Config
 
 
 def fitness_function(prey_function):
@@ -15,23 +15,17 @@ def fitness_function(prey_function):
 def run_simulation(prey_function, pred_function, print_move=False, draw_grid=False, lotka_volterra=False):
     parser = argparse.ArgumentParser()
     parser.add_argument('--gridDim', default=50, type=int, help='Size of the grid')
-    parser.add_argument('--nPredators', default=100, type=int, help='Number of initial predators')
-    parser.add_argument('--nPrey', default=300, type=int, help='Number of initial preys')
-    parser.add_argument('--nGrass', default=1600, type=int, help='Number of initial grass')
-    parser.add_argument('--learningRate', default=0.1, type=int, help='Learning rate of RL')
-    parser.add_argument('--discountFactor', default=1, type=int, help='Discount factor of RL')
+    parser.add_argument('--nPredators', default=Config.predators, type=int, help='Number of initial predators')
+    parser.add_argument('--nPrey', default=Config.preys, type=int, help='Number of initial preys')
     parser.add_argument('--predRepAge', default=8, type=int, help='Reproduction Age of predators')
-    parser.add_argument('--predDeathRate', default=0.0021, type=int, help='Probability of dying by hunger')
-    parser.add_argument('--predRepRate', default=0.07, type=int, help='Probability of giving birth')
+    parser.add_argument('--predDeathRate', default=Config.delta, type=int, help='Probability of dying by hunger')
+    parser.add_argument('--predRepRate', default=Config.gamma, type=int, help='Probability of giving birth by predators')
     parser.add_argument('--preyRepAge', default=4, type=int, help='Reproduction Age of preys')
-    parser.add_argument('--preyDeathRate', default=0.023, type=int, help='Probability of dying due to predation')
-    parser.add_argument('--preyRepRate', default=0.027, type=int, help='Probabiliy of giving birth')
+    parser.add_argument('--preyDeathRate', default=Config.beta, type=int, help='Probability of dying due to predation')
+    parser.add_argument('--preyRepRate', default=Config.alpha, type=int, help='Probability of giving birth by preys')
     parser.add_argument('--mPred', default=5, type=int, help='The time after which predators get hungry')
     parser.add_argument('--mPrey', default=2, type=int, help='The time after which pray get hungry')
-    parser.add_argument('--grassRepRate', default=0.022, type=int, help='Probabiliy of giving birth')
-    parser.add_argument('--grassConsRate', default=0.2, type=int, help='How much it gets consumed when eaten')
-    parser.add_argument('--numLearningIterations', default=100, type=int, help='Time in which the agents can learn')
-    parser.add_argument('--totalNumIterations', default=100, type=int)
+    parser.add_argument('--totalNumIterations', default=Config.iterations, type=int)
 
     args = parser.parse_args()
 
@@ -39,9 +33,6 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
     yDim = args.gridDim
     nPredators = args.nPredators
     nPrey = args.nPrey
-    nGrass = args.nGrass
-    learningRate = args.learningRate
-    discountFactor = args.discountFactor
     predRepAge = args.predRepAge
     predDeathRate = args.predDeathRate
     predRepRate = args.predRepRate
@@ -50,60 +41,32 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
     preyRepRate = args.preyRepRate
     mPred = args.mPred
     mPrey = args.mPrey
-    grassRepRate = args.grassRepRate
-    grassConsRate = args.grassConsRate
 
-    numLearningIterations = args.numLearningIterations
     totalNumIterations = args.totalNumIterations
     all_epochs_num_agents = []
 
     preyV = [nPrey]
     predV = [nPredators]
-    grassV = []
     predLastAteV = []
     preyLastAteV = []
     ratioV = []
 
-    WeightsInfo = []
 
-    grid = Grid(xDim, yDim, nPredators, nPrey, nGrass, learningRate, discountFactor,
-                predRepAge, predDeathRate, predRepRate, preyRepAge, preyDeathRate, preyRepRate, mPred, mPrey,
-                grassRepRate, grassConsRate, prey_function, pred_function, print_move)
+    grid = Grid(xDim, yDim, nPredators, nPrey, predRepAge, predDeathRate, predRepRate, preyRepAge,
+                preyDeathRate, preyRepRate, mPred, mPrey, prey_function, pred_function, print_move)
 
-    for i in range(1, numLearningIterations):
+    for i in range(1, totalNumIterations + 1):
         if draw_grid:
             grid.draw()
-        numAgents = grid.update(True, i, ["prey"])
-        if draw_grid:
-            grid.draw()
-        preyV.append(numAgents[0])
-        predV.append(numAgents[1])
-        grassV.append(numAgents[2])
-        [preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP, ratio] = numAgents[3:]
-        print("Iteration: %d. Preys: %d, Predators: %d " % (i, numAgents[0], numAgents[1]))
-        preyLastAteV.append(preyLastAteP)
-        predLastAteV.append(predLastAteP)
-        ratioV.append(ratio)
-        all_epochs_num_agents.append(numAgents.copy())
-        # a = ExtractInfo(grid)
-        # WeightsInfo.append(a)
-
-    i = numLearningIterations
-
-    while numAgents[0] > 0 and i <= totalNumIterations:
-        if draw_grid:
-            grid.draw()
-        numAgents = grid.update(False, i, ["prey"])
+        numAgents = grid.update(i)
         if draw_grid:
             grid.draw()
         preyV.append(numAgents[0])
         predV.append(numAgents[1])
-        grassV.append(numAgents[2])
-        [preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP, ratio] = numAgents[3:]
+        [preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP, ratio] = numAgents[2:]
         print("Iteration: %d. Preys: %d, Predators: %d " % (i, numAgents[0], numAgents[1]))
-        i += 1
-        predLastAteV.append(predLastAteP)
         preyLastAteV.append(preyLastAteP)
+        predLastAteV.append(predLastAteP)
         ratioV.append(ratio)
         all_epochs_num_agents.append(numAgents.copy())
 
@@ -115,9 +78,8 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
 
 
 class Grid:
-    def __init__(self, xDim, yDim, nPredators, nPrey, nGrass, learningRate, discountFactor,
-                 predRepAge, predDeathRate, predRepRate, preyRepAge, preyDeathRate, preyRepRate,
-                 mPred, mPrey, grassRepRate, grassConsRate, prey_function, pred_function, print_move):
+    def __init__(self, xDim, yDim, nPredators, nPrey, predRepAge, predDeathRate, predRepRate, preyRepAge, preyDeathRate,
+                 preyRepRate, mPred, mPrey, prey_function, pred_function, print_move):
         self.xDim = xDim
         self.yDim = yDim
         self.nPredators = nPredators
@@ -126,14 +88,10 @@ class Grid:
         self.grassGrid = [[0 for x in range(xDim)] for y in range(yDim)]
         self.agentList = []
         self.ID = 1
-        self.learningRate = learningRate
-        self.discountFactor = discountFactor
         self.predRepAge = predRepAge
         self.predDeathRate = predDeathRate
         self.predRepRate = predRepRate
         self.preyRepAge = preyRepAge
-        self.grassRepRate = grassRepRate
-        self.grassConsRate = grassConsRate
         self.mPred = mPred
         self.mPrey = mPrey
         self.preyDeaths = 0
@@ -142,14 +100,13 @@ class Grid:
         self.predDeathAge = 0
         self.numPred = nPredators
         self.numPrey = nPrey
-        self.numGrass = nGrass
         self.print_move = print_move
         for i in range(nPredators):
             initWeights = np.random.rand(12) * 6 - 3
             x = random.randint(0, xDim - 1)
             y = random.randint(0, yDim - 1)
             pred = Predator(x, y, self.ID, 0, -1, predRepAge, predDeathRate,
-                            predRepRate, initWeights, learningRate, discountFactor, mPred, pred_function)
+                            predRepRate, initWeights, mPred, pred_function)
             self.grid[x][y].append(pred)
             self.agentList.append([self.ID, x, y, 0])
             self.ID += 1
@@ -158,12 +115,12 @@ class Grid:
             x = random.randint(0, xDim - 1)
             y = random.randint(0, yDim - 1)
             prey = Prey(x, y, self.ID, 0, -1, preyRepAge, preyDeathRate,
-                        preyRepRate, initWeights, learningRate, discountFactor, mPrey, prey_function)
+                        preyRepRate, initWeights, mPrey, prey_function)
             self.grid[x][y].append(prey)
             self.agentList.append([self.ID, x, y, 1])
             self.ID += 1
 
-    def update(self, learning, i, simulated_agents):
+    def update(self, i):
         random.shuffle(self.agentList)
         predLastAte = 0
         preyLastAte = 0
@@ -197,9 +154,6 @@ class Grid:
                 agentInfo[2] = newCoordsY
                 x = newCoordsX
                 y = newCoordsY
-                # if learning:
-                #     r=agent.Get_Reward(self)
-                #     agent.Update_Weight(r, self, agent.q)
                 if eatenID != -1:
                     for agents in self.grid[x][y]:
                         if agents.ID == eatenID:
@@ -231,7 +185,7 @@ class Grid:
                     self.agentList.append([self.ID, x, y, 0])
                     self.ID += 1
             elif agentType == 1:
-                preyLastAte = preyLastAte + agent.lastAte
+                preyLastAte += agent.lastAte
                 agent.Aging(i)
                 # Monving and learning
                 [newCoordsX, newCoordsY], eatenID, offspring = agent.pick_action(self, self.print_move)
@@ -245,10 +199,7 @@ class Grid:
                 agentInfo[2] = newCoordsY
                 x = newCoordsX
                 y = newCoordsY
-                # if learning and "prey" not in simulated_agents:
-                #     r=agent.Get_Reward(self)
-                #     agent.Update_Weight(r, self, agent.q)
-                # eatenID = agent.Eat(self.grid[x][y])
+
                 if eatenID != -1:
                     for agents in self.grid[x][y]:
                         if agents.ID == eatenID:
@@ -295,7 +246,7 @@ class Grid:
         else:
             predLastAteP = 0
         ratio = deathsbyeat / (deathsbystv + deathsbyeat + 0.00000000001)
-        return [self.numPrey, self.numPred, self.numGrass, preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP,
+        return [self.numPrey, self.numPred, preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP,
                 ratio]
 
     def draw(self):

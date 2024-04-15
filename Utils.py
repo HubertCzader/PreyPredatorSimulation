@@ -1,5 +1,5 @@
 import numpy as np
-from deap import gp, creator, base, tools, algorithms
+from deap import gp, creator, base, tools
 import networkx as nx
 import matplotlib.pyplot as plt
 from FlowOperators import sequence2, sequence3, selector2, selector3

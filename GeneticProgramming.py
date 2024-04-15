@@ -36,16 +36,6 @@ PREDATOR_ARGS = [
 ]
 pset_predator = create_pset(PREDATOR_TERMINALS, PREDATOR_ARGS)
 
-# prim_root = deap.gp.Primitive('sequence2', (object, object), object)
-#
-# term_eat = deap.gp.Terminal('eat', True, object)
-# term_predator_nearby = deap.gp.Terminal('predator_nearby', True, object)
-#
-# best_prey = [prim_root, term_predator_nearby, term_eat]\'eat\'
-
-# With grass
-# best_prey = 'selector2(selector3(sequence2(predator_nearby, \'go_from_predator\'), sequence2(hunger_over_half, \'reproduce\'), sequence2(on_grass, \'eat\')), \'go_to_food\')'
-# best_predator = 'selector3(sequence2(hunger_over_half, \'reproduce\'), sequence2(caught_prey, \'eat\'), \'go_to_prey\')'
 
 best_prey = 'selector2(sequence2(predator_nearby, \'go_from_predator\'), \'reproduce\')'
 best_predator = 'selector3(\'reproduce\', sequence2(caught_prey, \'eat\'), \'go_to_prey\')'
@@ -76,8 +66,6 @@ def eval_prey_lv(individual):
     predator_routine = gp.compile(best_predator, pset_predator)
     predators, preys = run_simulation(routine, predator_routine, lotka_volterra=True)
     expected_preys, expected_predators = lotka_volterra(preys[0], predators[0], len(preys))
-
-    # print(prey_counts)
 
     plt.plot(range(len(predators)), predators, label='predator')
     plt.plot(range(len(preys)), preys, label='prey')
@@ -115,9 +103,6 @@ if __name__ == '__main__':
     predator_logs = []
     prey_counts, pred_counts = show_behaviour(lotka_voltera_model=True, draw_grid=False)
     correct_prey, correct_pred = lotka_volterra(prey_counts[0], pred_counts[0], len(prey_counts))
-    print("Correct prey:", correct_prey)
-    print("Correct pred:", correct_pred)
-
 
     plt.figure()
     plt.plot(range(len(prey_counts)), prey_counts, label='Preys')
