@@ -4,6 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from FlowOperators import sequence2, sequence3, selector2, selector3
 
+
 def plot_logbook(logbook):
     min_values = logbook.select("min")
     max_values = logbook.select("max")
@@ -16,6 +17,7 @@ def plot_logbook(logbook):
     plt.legend()
     plt.show()
 
+
 def plot_tree(nodes, edges, labels):
     g = nx.Graph()
     g.add_nodes_from(nodes)
@@ -26,6 +28,7 @@ def plot_tree(nodes, edges, labels):
     nx.draw_networkx_labels(g, pos, labels)
     plt.show()
 
+
 def create_pset(terminals, args):
     pset = gp.PrimitiveSet("main", len(terminals))
     pset.addPrimitive(sequence2, 2)
@@ -35,8 +38,10 @@ def create_pset(terminals, args):
     deap_args = [f"ARG{i}" for i in range(len(args))]
     kargs = {k: v for k, v in zip(deap_args, args)}
     pset.renameArguments(**kargs)
-    for terminal in terminals: pset.addTerminal(terminal)
+    for terminal in terminals:
+        pset.addTerminal(terminal)
     return pset
+
 
 def create_toolbox(pset, pool, eval_fn):
     toolbox = base.Toolbox()
@@ -52,6 +57,7 @@ def create_toolbox(pset, pool, eval_fn):
     toolbox.register("expr_mut", gp.genFull, min_=1, max_=3)
     toolbox.register("mutate", gp.mutUniform, expr=toolbox.expr_mut, pset=pset)
     return toolbox
+
 
 def create_stats():
     stats = tools.Statistics(lambda ind: ind.fitness.values)

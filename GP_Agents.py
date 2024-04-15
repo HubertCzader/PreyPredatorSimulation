@@ -2,9 +2,11 @@ import numpy as np
 import itertools
 from GrassAgent import Grass
 
+
 def von_neumann_neighborhood(n):
-     neighborhood = [[(n,i), (-n,i), (i,n), (i,-n)] for i in range(-n,n+1)]
-     return sorted(list(set(list(itertools.chain(*neighborhood)))))
+    neighborhood = [[(n, i), (-n, i), (i, n), (i, -n)] for i in range(-n, n + 1)]
+    return sorted(list(set(list(itertools.chain(*neighborhood)))))
+
 
 class Prey:
     ptype = -1  # 1 if predator, -1 for prey
@@ -29,9 +31,9 @@ class Prey:
         self.hunger_minimum = hunger_minimum
         self.q = 0
         self.tree_function = tree_function
-    
+
     def in_grid(self, matrix, location):
-         return  -1 < location[0] < matrix.xDim and -1 < location[1] < matrix.yDim
+        return -1 < location[0] < matrix.xDim and -1 < location[1] < matrix.yDim
 
     def predator_distance(self, matrix, location):
         for r in range(1, 4):
@@ -49,7 +51,6 @@ class Prey:
         """
         grass_nearby = False
         grass_location = None
-        furthest_from_predator_location = None
         own_location = np.array([self.x_position, self.y_position])
         location_predator_min_distance = self.predator_distance(matrix, own_location)
         location_predator_max_distance = self.predator_distance(matrix, own_location)
@@ -57,7 +58,7 @@ class Prey:
         on_grass = False
         for entity in matrix.grid[own_location[0]][own_location[1]]:
             if entity.ptype == 0:
-                on_grass = True 
+                on_grass = True
                 break
         for dx, dy in von_neumann_neighborhood(1):
             new_location = [self.x_position + dx, self.y_position + dy]
@@ -72,7 +73,9 @@ class Prey:
                     furthest_from_predator_location = new_location
                 if location_predator_distance < location_predator_min_distance:
                     location_predator_min_distance = location_predator_distance
-        result = self.tree_function(grass_nearby, location_predator_min_distance < 4, self.lastAte < (self.hunger_minimum // 2), self.age >= self.reproduction_age, on_grass)
+        result = self.tree_function(grass_nearby, location_predator_min_distance < 4,
+                                    self.lastAte < (self.hunger_minimum // 2), self.age >= self.reproduction_age,
+                                    on_grass)
 
         if print_move:
             print(result)
@@ -106,13 +109,11 @@ class Prey:
     #                 return agent.ID
     #     return -1
 
-
     def Starve(self):
         r = np.random.rand()
         if r < self.death_rate:
             return self.ID
         return -1
-
 
     def Reproduce(self):
         offspring = 0
@@ -123,10 +124,12 @@ class Prey:
         # if self.age >= self.reproduction_age and self.lastAte < (self.hunger_minimum // 2):
         if self.age >= self.reproduction_age and r < self.reproduction_rate:
             self.lastAte = self.hunger_minimum - food_in_stomach + offspring_food
-            offspring = Prey(self.x_position, self.y_position, -1, self.hunger_minimum - offspring_food, self.ID, self.reproduction_age,
+            offspring = Prey(self.x_position, self.y_position, -1, self.hunger_minimum - offspring_food, self.ID,
+                             self.reproduction_age,
                              self.death_rate, self.reproduction_rate, self.weights, self.learning_rate,
                              self.discount_factor, offspring_food, self.tree_function)  # ID is changed in Grid.update()
         return offspring
+
 
 class Predator:
     ptype = 1  # 1 if predator, -1 for prey
@@ -140,7 +143,7 @@ class Predator:
         self.x_position = x_position
         self.y_position = y_position
         self.ID = ID
-        self.lastAte = lastAte # Time when predator last ate
+        self.lastAte = lastAte  # Time when predator last ate
         self.father = father
         self.reproduction_age = reproduction_age
         self.death_rate = death_rate
@@ -166,7 +169,7 @@ class Predator:
                 prey_location = own_location.copy()
                 break
         if prey_location is None:
-            for r in range(1,10):
+            for r in range(1, 10):
                 for dx, dy in von_neumann_neighborhood(r):
                     new_location = [own_location[0] + dx, own_location[1] + dy]
                     if -1 < new_location[0] < matrix.xDim and -1 < new_location[1] < matrix.yDim:
@@ -176,7 +179,7 @@ class Predator:
                                     prey_nearby = True
                                 prey_location = new_location.copy()
                                 break
-                if prey_location: 
+                if prey_location:
                     break
 
         if self.tree_function is None:
@@ -185,8 +188,9 @@ class Predator:
         result = self.tree_function(prey_nearby,
                                     self.lastAte < (self.hunger_minimum // 2),
                                     self.age >= self.reproduction_age,
-                                    prey_location is not None and prey_location[0] == own_location[0] and prey_location[1] == own_location[1],
-                )
+                                    prey_location is not None and prey_location[0] == own_location[0] and prey_location[
+                                        1] == own_location[1],
+                                    )
         if print_move:
             print(result)
         if result == 'go_to_prey':
@@ -235,7 +239,9 @@ class Predator:
         # if self.age >= self.reproduction_age and self.lastAte < (self.hunger_minimum // 2):
         if self.age >= self.reproduction_age and r < self.reproduction_rate:
             self.lastAte = self.hunger_minimum - food_in_stomach + offspring_food
-            offspring = Predator(self.x_position, self.y_position, -1, self.hunger_minimum - offspring_food, self.ID, self.reproduction_age,
+            offspring = Predator(self.x_position, self.y_position, -1, self.hunger_minimum - offspring_food, self.ID,
+                                 self.reproduction_age,
                                  self.death_rate, self.reproduction_rate, self.weights, self.learning_rate,
-                                 self.discount_factor, self.hunger_minimum, self.tree_function)  # ID is changed in Grid.update()
+                                 self.discount_factor, self.hunger_minimum,
+                                 self.tree_function)  # ID is changed in Grid.update()
         return offspring

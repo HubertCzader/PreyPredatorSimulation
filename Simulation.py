@@ -7,8 +7,10 @@ from GrassAgent import *
 from GP_Agents import Prey, Predator
 from matplotlib import pyplot as plt
 
+
 def fitness_function(prey_function):
     return np.mean([run_simulation(prey_function) for _ in range(3)])
+
 
 def run_simulation(prey_function, pred_function, print_move=False, draw_grid=False, lotka_volterra=False):
     parser = argparse.ArgumentParser()
@@ -22,7 +24,6 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
     parser.add_argument('--predDeathRate', default=0.0021, type=int, help='Probability of dying by hunger')
     parser.add_argument('--predRepRate', default=0.07, type=int, help='Probability of giving birth')
     parser.add_argument('--preyRepAge', default=4, type=int, help='Reproduction Age of preys')
-    # parser.add_argument('--preyDeathRate', default=0.05, type=int, help='Probability of dying by hunger')
     parser.add_argument('--preyDeathRate', default=0.023, type=int, help='Probability of dying due to predation')
     parser.add_argument('--preyRepRate', default=0.027, type=int, help='Probabiliy of giving birth')
     parser.add_argument('--mPred', default=5, type=int, help='The time after which predators get hungry')
@@ -30,7 +31,7 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
     parser.add_argument('--grassRepRate', default=0.022, type=int, help='Probabiliy of giving birth')
     parser.add_argument('--grassConsRate', default=0.2, type=int, help='How much it gets consumed when eaten')
     parser.add_argument('--numLearningIterations', default=100, type=int, help='Time in which the agents can learn')
-    parser.add_argument('--totalNumIterations', default=1000, type=int)
+    parser.add_argument('--totalNumIterations', default=100, type=int)
 
     args = parser.parse_args()
 
@@ -56,8 +57,8 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
     totalNumIterations = args.totalNumIterations
     all_epochs_num_agents = []
 
-    preyV = []
-    predV = []
+    preyV = [nPrey]
+    predV = [nPredators]
     grassV = []
     predLastAteV = []
     preyLastAteV = []
@@ -109,8 +110,9 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
     if lotka_volterra:
         return preyV, predV
 
-    fitness = lambda values: sum([((i+1)**2) * value / 400 for _, value in enumerate(values[-20:])])
+    fitness = lambda values: sum([((i + 1) ** 2) * value / 400 for _, value in enumerate(values[-20:])])
     return fitness(preyV), fitness(predV)
+
 
 class Grid:
     def __init__(self, xDim, yDim, nPredators, nPrey, nGrass, learningRate, discountFactor,
@@ -143,7 +145,7 @@ class Grid:
         self.numGrass = nGrass
         self.print_move = print_move
         for i in range(nPredators):
-            initWeights = np.random.rand(12)*6 - 3
+            initWeights = np.random.rand(12) * 6 - 3
             x = random.randint(0, xDim - 1)
             y = random.randint(0, yDim - 1)
             pred = Predator(x, y, self.ID, 0, -1, predRepAge, predDeathRate,
@@ -152,7 +154,7 @@ class Grid:
             self.agentList.append([self.ID, x, y, 0])
             self.ID += 1
         for i in range(nPrey):
-            initWeights = np.random.rand(12)*6 - 3
+            initWeights = np.random.rand(12) * 6 - 3
             x = random.randint(0, xDim - 1)
             y = random.randint(0, yDim - 1)
             prey = Prey(x, y, self.ID, 0, -1, preyRepAge, preyDeathRate,
@@ -163,23 +165,23 @@ class Grid:
 
     def update(self, learning, i, simulated_agents):
         random.shuffle(self.agentList)
-        predLastAte=0
-        preyLastAte=0
-        deathsbyeat=0
-        deathsbystv=0
+        predLastAte = 0
+        preyLastAte = 0
+        deathsbyeat = 0
+        deathsbystv = 0
         for agentInfo in self.agentList:
             agentId = agentInfo[0]
             x = agentInfo[1]
             y = agentInfo[2]
             agentType = agentInfo[3]
             agent = None
-            #Get current agent based on id
+            # Get current agent based on id
             for agents in self.grid[x][y]:
                 if agents.ID == agentId:
                     agent = agents
                     break
-            #Move agents, add eating etc.
-            if agentType == 0:               #Predator
+            # Move agents, add eating etc.
+            if agentType == 0:  # Predator
                 predLastAte = predLastAte + agent.lastAte
                 agent.Aging(i)
                 # Moving and learning
@@ -207,7 +209,7 @@ class Grid:
                     self.preyDeaths += 1
                     self.numPrey -= 1
                     self.grid[x][y].remove(eatenAgent)
-                    deathsbyeat=deathsbyeat+1
+                    deathsbyeat = deathsbyeat + 1
                     for agentProperties in self.agentList:
                         if agentProperties[0] == eatenID:
                             eatenAgent = agentProperties
@@ -229,9 +231,9 @@ class Grid:
                     self.agentList.append([self.ID, x, y, 0])
                     self.ID += 1
             elif agentType == 1:
-                preyLastAte =preyLastAte + agent.lastAte
+                preyLastAte = preyLastAte + agent.lastAte
                 agent.Aging(i)
-                #Monving and learning
+                # Monving and learning
                 [newCoordsX, newCoordsY], eatenID, offspring = agent.pick_action(self, self.print_move)
                 newCoordsX = int(newCoordsX)
                 newCoordsY = int(newCoordsY)
@@ -267,7 +269,7 @@ class Grid:
                         self.numPrey -= 1
                         self.grid[x][y].remove(agent)
                         self.agentList.remove(agentInfo)
-                        deathsbystv=deathsbystv+1
+                        deathsbystv = deathsbystv + 1
 
                 if offspring != 0:
                     offspring.ID = self.ID
@@ -285,15 +287,16 @@ class Grid:
         else:
             predDeathAvg = 0
         if self.numPrey != 0:
-            preyLastAteP = float(preyLastAte)/float(self.numPrey)
+            preyLastAteP = float(preyLastAte) / float(self.numPrey)
         else:
             preyLastAteP = 0
         if self.numPred != 0:
-            predLastAteP = float(predLastAte)/float(self.numPred)
+            predLastAteP = float(predLastAte) / float(self.numPred)
         else:
             predLastAteP = 0
-        ratio = deathsbyeat/(deathsbystv+deathsbyeat+0.00000000001)
-        return [self.numPrey, self.numPred, self.numGrass, preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP, ratio]
+        ratio = deathsbyeat / (deathsbystv + deathsbyeat + 0.00000000001)
+        return [self.numPrey, self.numPred, self.numGrass, preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP,
+                ratio]
 
     def draw(self):
         # plt.clf()
