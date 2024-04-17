@@ -41,7 +41,7 @@ class Prey:
                             return r
         return matrix.xDim
 
-    def pick_action(self, matrix, print_move):
+    def pick_action(self, matrix):
         """
         Perform action (i.e. movement) of the agent depending on its evaluations
         """
@@ -71,8 +71,6 @@ class Prey:
                                     self.lastAte < (self.hunger_minimum // 2), self.age >= self.reproduction_age,
                                     on_grass)
 
-        if print_move:
-            print(result)
         if result == 'go_from_predator':
             return furthest_from_predator_location if furthest_from_predator_location is not None else own_location, -1, 0
         if result == "reproduce":
@@ -127,7 +125,7 @@ class Predator:
         self.q = 0
         self.tree_function = tree_function
 
-    def pick_action(self, matrix, print_move):
+    def pick_action(self, matrix):
         """
         Perform action (i.e. movement) of the agent depending on its evaluations
         """
@@ -163,8 +161,7 @@ class Predator:
                                     prey_location is not None and prey_location[0] == own_location[0] and prey_location[
                                         1] == own_location[1],
                                     )
-        if print_move:
-            print(result)
+
         if result == 'go_to_prey':
             if prey_location is None:
                 return own_location, -1, 0

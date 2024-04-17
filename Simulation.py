@@ -12,7 +12,7 @@ def fitness_function(prey_function):
     return np.mean([run_simulation(prey_function) for _ in range(3)])
 
 
-def run_simulation(prey_function, pred_function, print_move=False, draw_grid=False, lotka_volterra=False):
+def run_simulation(prey_function, pred_function, print_state=False, draw_grid=False, lotka_volterra=False):
     parser = argparse.ArgumentParser()
     parser.add_argument('--gridDim', default=50, type=int, help='Size of the grid')
     parser.add_argument('--nPredators', default=Config.predators, type=int, help='Number of initial predators')
@@ -53,7 +53,7 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
 
 
     grid = Grid(xDim, yDim, nPredators, nPrey, predRepAge, predDeathRate, predRepRate, preyRepAge,
-                preyDeathRate, preyRepRate, mPred, mPrey, prey_function, pred_function, print_move)
+                preyDeathRate, preyRepRate, mPred, mPrey, prey_function, pred_function)
 
     for i in range(1, totalNumIterations + 1):
         if draw_grid:
@@ -64,7 +64,8 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
         preyV.append(numAgents[0])
         predV.append(numAgents[1])
         [preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP, ratio] = numAgents[2:]
-        print("Iteration: %d. Preys: %d, Predators: %d " % (i, numAgents[0], numAgents[1]))
+        if print_state:
+            print("Iteration: %d. Preys: %d, Predators: %d " % (i, numAgents[0], numAgents[1]))
         preyLastAteV.append(preyLastAteP)
         predLastAteV.append(predLastAteP)
         ratioV.append(ratio)
@@ -79,7 +80,7 @@ def run_simulation(prey_function, pred_function, print_move=False, draw_grid=Fal
 
 class Grid:
     def __init__(self, xDim, yDim, nPredators, nPrey, predRepAge, predDeathRate, predRepRate, preyRepAge, preyDeathRate,
-                 preyRepRate, mPred, mPrey, prey_function, pred_function, print_move):
+                 preyRepRate, mPred, mPrey, prey_function, pred_function):
         self.xDim = xDim
         self.yDim = yDim
         self.nPredators = nPredators
@@ -100,7 +101,6 @@ class Grid:
         self.predDeathAge = 0
         self.numPred = nPredators
         self.numPrey = nPrey
-        self.print_move = print_move
         for i in range(nPredators):
             initWeights = np.random.rand(12) * 6 - 3
             x = random.randint(0, xDim - 1)
@@ -142,7 +142,7 @@ class Grid:
                 predLastAte = predLastAte + agent.lastAte
                 agent.Aging(i)
                 # Moving and learning
-                [newCoordsX, newCoordsY], eatenID, offspring = agent.pick_action(self, self.print_move)
+                [newCoordsX, newCoordsY], eatenID, offspring = agent.pick_action(self)
                 newCoordsX = int(newCoordsX)
                 newCoordsY = int(newCoordsY)
                 self.grid[x][y].remove(agent)
@@ -188,7 +188,7 @@ class Grid:
                 preyLastAte += agent.lastAte
                 agent.Aging(i)
                 # Monving and learning
-                [newCoordsX, newCoordsY], eatenID, offspring = agent.pick_action(self, self.print_move)
+                [newCoordsX, newCoordsY], eatenID, offspring = agent.pick_action(self)
                 newCoordsX = int(newCoordsX)
                 newCoordsY = int(newCoordsY)
                 self.grid[x][y].remove(agent)
