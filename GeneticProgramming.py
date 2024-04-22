@@ -123,7 +123,8 @@ def decision_tree_prey():
     nx.draw_networkx_nodes(G, pos)
     nx.draw_networkx_edges(G, pos)
     nx.draw_networkx_labels(G, pos, new_labels)
-    plt.show()
+    plt.savefig("prey_decision_tree.png")
+    # plt.show()
     # plot_tree(nodes, edges, labels)
 
 
@@ -148,7 +149,8 @@ def decision_tree_predator():
     nx.draw_networkx_nodes(G, pos)
     nx.draw_networkx_edges(G, pos)
     nx.draw_networkx_labels(G, pos, new_labels)
-    plt.show()
+    plt.savefig("predator_decision_tree.png")
+    # plt.show()
     # plot_tree(nodes, edges, labels)
 
 
