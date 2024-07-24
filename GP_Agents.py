@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+import random
 
 
 def von_neumann_neighborhood(n):
@@ -7,20 +8,25 @@ def von_neumann_neighborhood(n):
     return sorted(list(set(list(itertools.chain(*neighborhood)))))
 
 
+def sigmoid(value, inflection_point, k=0.3):
+    return 1 / (1 + np.exp(-k * (value - inflection_point)))
+
+
 class Prey:
     ptype = -1  # 1 if predator, -1 for prey
-    age = 0
     epsilon = 0.2
 
-    def __init__(self, x_position, y_position, ID, lastAte, father, reproduction_age,
+    def __init__(self, x_position, y_position, ID, lastAte, father, reproduction_age, death_age,
                  death_rate, reproduction_rate, weights, hunger_minimum, tree_function):
 
         self.x_position = x_position
         self.y_position = y_position
         self.ID = ID
+        self.age = random.randint(0, 8)
         self.lastAte = lastAte
         self.father = father
         self.reproduction_age = reproduction_age
+        self.death_age = death_age
         self.death_rate = death_rate
         self.reproduction_rate = reproduction_rate
         self.weights = weights
@@ -51,16 +57,16 @@ class Prey:
         location_predator_max_distance = self.predator_distance(matrix, own_location)
         furthest_from_predator_location = own_location
         on_grass = False
-        for entity in matrix.grid[own_location[0]][own_location[1]]:
-            if entity.ptype == 0:
-                on_grass = True
-                break
+        # for entity in matrix.grid[own_location[0]][own_location[1]]:
+        #     if entity.ptype == 0:
+        #         on_grass = True
+        #         break
         for dx, dy in von_neumann_neighborhood(1):
             new_location = [self.x_position + dx, self.y_position + dy]
             if self.in_grid(matrix, new_location):
-                for entity in matrix.grid[new_location[0]][new_location[1]]:
-                    if entity.ptype == 0:
-                        grass_nearby = True
+                # for entity in matrix.grid[new_location[0]][new_location[1]]:
+                #     if entity.ptype == 0:
+                #         grass_nearby = True
                 location_predator_distance = self.predator_distance(matrix, new_location)
                 if location_predator_distance > location_predator_max_distance:
                     location_predator_max_distance = location_predator_distance
@@ -84,7 +90,7 @@ class Prey:
 
     def Starve(self):
         r = np.random.rand()
-        if r < self.death_rate:
+        if r < self.death_rate + sigmoid(self.age, self.death_age - 10):
             return self.ID
         return -1
 
@@ -98,7 +104,7 @@ class Prey:
         if self.age >= self.reproduction_age and r < self.reproduction_rate:
             self.lastAte = self.hunger_minimum - food_in_stomach + offspring_food
             offspring = Prey(self.x_position, self.y_position, -1, self.hunger_minimum - offspring_food, self.ID,
-                             self.reproduction_age,
+                             self.reproduction_age, self.death_age,
                              self.death_rate, self.reproduction_rate, self.weights,
                              offspring_food, self.tree_function)  # ID is changed in Grid.update()
         return offspring
@@ -106,18 +112,19 @@ class Prey:
 
 class Predator:
     ptype = 1  # 1 if predator, -1 for prey
-    age = 0
     epsilon = 0.2
 
-    def __init__(self, x_position, y_position, ID, lastAte, father, reproduction_age,
+    def __init__(self, x_position, y_position, ID, lastAte, father, reproduction_age, death_age,
                  death_rate, reproduction_rate, weights, hunger_minimum, tree_function):
 
         self.x_position = x_position
         self.y_position = y_position
         self.ID = ID
+        self.age = random.randint(0, 12)
         self.lastAte = lastAte  # Time when predator last ate
         self.father = father
         self.reproduction_age = reproduction_age
+        self.death_age = death_age
         self.death_rate = death_rate
         self.reproduction_rate = reproduction_rate
         self.weights = weights
@@ -194,9 +201,12 @@ class Predator:
     def Starve(self):
         if self.lastAte > self.hunger_minimum:
             pdeath = self.lastAte * self.death_rate
-            r = np.random.rand()
-            if r < pdeath:
-                return self.ID
+            # pdeath = sigmoid(self.lastAte, self.hunger_minimum, self.death_rate)
+        else:
+            pdeath = self.death_rate
+        r = np.random.rand()
+        if r < pdeath + sigmoid(self.age, self.death_age - 20):
+            return self.ID
         return -1
 
     def Reproduce(self):
@@ -206,10 +216,10 @@ class Predator:
         r = np.random.rand()
         # This peace of code makes reproduction dependent on the level of satiety
         # if self.age >= self.reproduction_age and self.lastAte < (self.hunger_minimum // 2):
-        if self.age >= self.reproduction_age and r < self.reproduction_rate:
+        if self.age >= self.reproduction_age and r < self.reproduction_rate and self.lastAte < self.hunger_minimum // 2:
             self.lastAte = self.hunger_minimum - food_in_stomach + offspring_food
             offspring = Predator(self.x_position, self.y_position, -1, self.hunger_minimum - offspring_food, self.ID,
-                                 self.reproduction_age,
+                                 self.reproduction_age, self.death_age,
                                  self.death_rate, self.reproduction_rate, self.weights,
                                  self.hunger_minimum, self.tree_function)  # ID is changed in Grid.update()
         return offspring

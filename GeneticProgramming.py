@@ -155,10 +155,9 @@ def decision_tree_predator():
 
 
 if __name__ == '__main__':
+    prey_counts, pred_counts = show_behaviour(print_state=True, lotka_voltera_model=True, draw_grid=False)
     # decision_tree_prey()
     # decision_tree_predator()
-
-    prey_counts, pred_counts = show_behaviour(print_state=True, lotka_voltera_model=True, draw_grid=False)
     # correct_prey, correct_pred = lotka_volterra(prey_counts[0], pred_counts[0], len(prey_counts))
     plt.figure()
     plt.plot(range(len(prey_counts)), prey_counts, label='Preys')
