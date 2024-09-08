@@ -4,7 +4,7 @@ import networkx as nx
 import pickle
 from Utils import plot_tree
 
-flow_operators = ["sequence3", "sequence2", "selector2", "selector3"]
+flow_operators = ["sequence3", "sequence2", "selector2", "selector3", "selector4"]
 
 
 def read_checkpoint(filename):
@@ -16,6 +16,13 @@ def read_checkpoint(filename):
 def save_checkpoint(filename, object):
     with open(filename, 'wb') as cp_file:
         pickle.dump(object, cp_file, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+def save_tree(filename, nodes, edges, labels):
+    with open(filename, 'w') as file:
+        file.write(f"{nodes}\n")
+        file.write(f"{edges}\n")
+        file.write(f"{labels}\n")
 
 
 def remove_node_recursively(node, G, edges):

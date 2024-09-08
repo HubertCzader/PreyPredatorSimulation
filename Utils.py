@@ -2,7 +2,7 @@ import numpy as np
 from deap import gp, creator, base, tools
 import networkx as nx
 import matplotlib.pyplot as plt
-from FlowOperators import sequence2, sequence3, selector2, selector3
+from FlowOperators import sequence2, sequence3, selector2, selector3, selector4, randomSelector2
 
 
 def plot_logbook(logbook):
@@ -19,18 +19,33 @@ def plot_logbook(logbook):
 
 
 def plot_tree(nodes, edges, labels):
+    plt.figure(figsize=(25, 10))
     g = nx.Graph()
     g.add_nodes_from(nodes)
     g.add_edges_from(edges)
     pos = nx.nx_pydot.graphviz_layout(g, prog="dot")
     nx.draw_networkx_nodes(g, pos)
     nx.draw_networkx_edges(g, pos)
-    nx.draw_networkx_labels(g, pos, labels)
+    nx.draw_networkx_labels(g, pos, labels, font_size=10)
     plt.show()
 
 
 def create_pset(terminals, args):
-    pset = gp.PrimitiveSet("main", len(terminals))
+    pset = gp.PrimitiveSet("main", len(args))
+    pset.addPrimitive(sequence2, 2)
+    pset.addPrimitive(sequence3, 3)
+    pset.addPrimitive(selector2, 2)
+    pset.addPrimitive(selector3, 3)
+    pset.addPrimitive(selector4, 4)
+    deap_args = [f"ARG{i}" for i in range(len(args))]
+    kargs = {k: v for k, v in zip(deap_args, args)}
+    pset.renameArguments(**kargs)
+    for terminal in terminals:
+        pset.addTerminal(terminal)
+    return pset
+
+def create_pset_pred(terminals, args):
+    pset = gp.PrimitiveSet("main", len(args))
     pset.addPrimitive(sequence2, 2)
     pset.addPrimitive(sequence3, 3)
     pset.addPrimitive(selector2, 2)
@@ -41,6 +56,7 @@ def create_pset(terminals, args):
     for terminal in terminals:
         pset.addTerminal(terminal)
     return pset
+
 
 
 def create_toolbox(pset, pool, eval_fn):

@@ -21,10 +21,10 @@ def lotka_volterra(x, y, length):
 
     alpha = Config.alpha  # natural growth rate of preys
     beta = Config.beta  # death rate per encounter of preys due to predation
-    gamma = Config.gamma  # natural growth rate of predators
-    delta = Config.delta  # natural death rate of predators in the absence of food
+    gamma = Config.gamma  # natural death rate of predators in the absence of food
+    delta = Config.delta  # natural growth rate of predators
 
-    timestep = 0.01
+    timestep = 0.001
 
     steps = int(length / timestep)
     inverse_timestep = int(1 / timestep)

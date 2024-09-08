@@ -14,18 +14,18 @@ def fitness_function(prey_function):
 
 def run_simulation(prey_function, pred_function, print_state=False, draw_grid=False, lotka_volterra=False):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--gridDim', default=30, type=int, help='Size of the grid')
+    parser.add_argument('--gridDim', default=50, type=int, help='Size of the grid')
     parser.add_argument('--nPredators', default=Config.predators, type=int, help='Number of initial predators')
     parser.add_argument('--nPrey', default=Config.preys, type=int, help='Number of initial preys')
-    parser.add_argument('--predRepAge', default=6, type=int, help='Reproduction Age of predators')
-    parser.add_argument('--predDeathAge', default=50, type=int, help='Death Age of predators')
+    parser.add_argument('--predRepAge', default=5, type=int, help='Reproduction Age of predators')
+    parser.add_argument('--predDeathAge', default=30, type=int, help='Death Age of predators')
     parser.add_argument('--predDeathRate', default=Config.gamma, type=int, help='Probability of dying by hunger')
     parser.add_argument('--predRepRate', default=Config.delta, type=int, help='Probability of giving birth by predators')
-    parser.add_argument('--preyRepAge', default=5, type=int, help='Reproduction Age of preys')
-    parser.add_argument('--preyDeathAge', default=32, type=int, help='Death Age of preys')
+    parser.add_argument('--preyRepAge', default=3, type=int, help='Reproduction Age of preys')
+    parser.add_argument('--preyDeathAge', default=30, type=int, help='Death Age of preys')
     parser.add_argument('--preyDeathRate', default=Config.beta, type=int, help='Probability of dying due to predation')
     parser.add_argument('--preyRepRate', default=Config.alpha, type=int, help='Probability of giving birth by preys')
-    parser.add_argument('--mPred', default=6, type=int, help='The time after which predators get hungry')
+    parser.add_argument('--mPred', default=3, type=int, help='The time after which predators get hungry')
     parser.add_argument('--mPrey', default=2, type=int, help='The time after which pray get hungry')
     parser.add_argument('--totalNumIterations', default=Config.iterations, type=int)
 
@@ -59,16 +59,18 @@ def run_simulation(prey_function, pred_function, print_state=False, draw_grid=Fa
     grid = Grid(xDim, yDim, nPredators, nPrey, predRepAge, predDeathAge, predDeathRate, predRepRate, preyRepAge,
                 preyDeathAge, preyDeathRate, preyRepRate, mPred, mPrey, prey_function, pred_function)
 
-    print("Iteration: %d. Preys: %d, Predators: %d " % (0, nPrey, nPredators))
+    if print_state:
+        print("Iteration: %d. Preys: %d, Predators: %d " % (0, nPrey, nPredators))
 
     for i in range(1, totalNumIterations + 1):
         if draw_grid:
             grid.draw()
-        if i > 5:
-            pass
         numAgents = grid.update(i)
+        # grid.save_img(i)
         if draw_grid:
             grid.draw()
+        if numAgents[0] == 0 or numAgents[1] == 0:
+            break
         preyV.append(numAgents[0])
         predV.append(numAgents[1])
         [preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP, ratio] = numAgents[2:]
@@ -97,27 +99,21 @@ class Grid:
         self.grassGrid = [[0 for x in range(xDim)] for y in range(yDim)]
         self.agentList = []
         self.ID = 1
-        self.predRepAge = predRepAge
-        self.predDeathRate = predDeathRate
-        self.predRepRate = predRepRate
-        self.preyRepAge = preyRepAge
-        self.mPred = mPred
-        self.mPrey = mPrey
         self.preyDeaths = 0
         self.predDeaths = 0
         self.preyDeathAgeSum = 0
         self.predDeathAgeSum = 0
-        self.preyDeathAge = preyDeathAge
-        self.predDeathAge = predDeathAge
         self.numPred = nPredators
         self.numPrey = nPrey
+        self.maxResources = 350
+        self.availableResources = self.maxResources
         for i in range(nPredators):
             initWeights = np.random.rand(12) * 6 - 3
             x = random.randint(0, xDim - 1)
             y = random.randint(0, yDim - 1)
-            # lastAte = random.randint(0, mPred + 2)
-            lastAte = 0
-            pred = Predator(x, y, self.ID, 0, lastAte, predRepAge, self.predDeathAge, predDeathRate,
+            lastAte = random.randint(0, mPred + 2)
+            # lastAte = 0
+            pred = Predator(x, y, self.ID, lastAte, 0, predRepAge, predDeathAge, predDeathRate,
                             predRepRate, initWeights, mPred, pred_function)
             self.grid[x][y].append(pred)
             self.agentList.append([self.ID, x, y, 0])
@@ -126,13 +122,14 @@ class Grid:
             initWeights = np.random.rand(12) * 6 - 3
             x = random.randint(0, xDim - 1)
             y = random.randint(0, yDim - 1)
-            prey = Prey(x, y, self.ID, 0, -1, preyRepAge, self.preyDeathAge, preyDeathRate,
+            prey = Prey(x, y, self.ID, 0, 0, preyRepAge, preyDeathAge, preyDeathRate,
                         preyRepRate, initWeights, mPrey, prey_function)
             self.grid[x][y].append(prey)
             self.agentList.append([self.ID, x, y, 1])
             self.ID += 1
 
     def update(self, i):
+        self.availableResources = self.maxResources - self.numPrey
         random.shuffle(self.agentList)
         predLastAte = 0
         preyLastAte = 0
@@ -197,7 +194,7 @@ class Grid:
                     self.grid[x][y].append(offspring)
                     self.agentList.append([self.ID, x, y, 0])
                     self.ID += 1
-            elif agentType == 1:
+            elif agentType == 1: #Prey
                 preyLastAte += agent.lastAte
                 agent.Aging(i)
                 # Monving and learning
@@ -262,6 +259,46 @@ class Grid:
         ratio = deathsbyeat / (deathsbystv + deathsbyeat + 0.00000000001)
         return [self.numPrey, self.numPred, preyDeathAvg, predDeathAvg, preyLastAteP, predLastAteP,
                 ratio]
+
+    def save_img(self, i):
+        xs = [[], []]
+        ys = [[], []]
+        green_xs = []
+        green_ys = []
+
+        for agent in self.agentList:
+            x = agent[1]
+            y = agent[2]
+            agent_type = agent[3]
+
+            if agent_type == 0:
+                xs[0].append(x)
+                ys[0].append(y)
+            else:
+                xs[1].append(x)
+                ys[1].append(y)
+
+        for x_pred, y_pred in zip(xs[0], ys[0]):
+            if (x_pred, y_pred) in zip(xs[1], ys[1]):
+                green_xs.append(x_pred)
+                green_ys.append(y_pred)
+
+        for gx, gy in zip(green_xs, green_ys):
+            if gx in xs[0] and gy in ys[0]:
+                idx = xs[0].index(gx)
+                xs[0].pop(idx)
+                ys[0].pop(idx)
+            if gx in xs[1] and gy in ys[1]:
+                idx = xs[1].index(gx)
+                xs[1].pop(idx)
+                ys[1].pop(idx)
+
+        plt.clf()
+        plt.scatter(xs[1], ys[1], color='b', label="Preys")
+        plt.scatter(xs[0], ys[0], color='r', label="Predators")
+        plt.scatter(green_xs, green_ys, color='g', label="Conflict")
+        plt.savefig("map/epoch" + str(i) + ".png")
+
 
     def draw(self):
         # plt.clf()
