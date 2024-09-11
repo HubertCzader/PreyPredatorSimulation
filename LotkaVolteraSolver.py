@@ -12,9 +12,9 @@ init = [x0, y0]
 alpha = 0.7  # natural growth rate of preys
 beta = 0.01  # death rate per encounter of preys due to predation
 gamma = 0.001  # natural death rate of predators in the absence of food
-delta = 0.5  # natural growth rate of predators
+delta = 0.6  # natural growth rate of predators
 
-t = np.linspace(0, 1001, 1001)
+t = np.linspace(0, 100, 1001)
 
 def rhs(populations, t) -> List:
     global alpha, beta, gamma, delta
@@ -47,5 +47,5 @@ def generateModelPlot(result, time) -> None:
 
 if __name__ == "__main__":
     result = sp.integrate.odeint(rhs, init, t)
-    print(result[:, 0])
-    # generateModelPlot(result, t)
+    # print(result[:, 0])
+    generateModelPlot(result, t)
