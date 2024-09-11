@@ -128,7 +128,7 @@ def decision_tree_prey():
     _, logbook = algorithms.eaSimple(pop_prey, toolbox_prey, 0.7, 0.1, 10, stats_prey, halloffame=hof_prey)
     best_prey = hof_prey[0]
     nodes, edges, labels = gp.graph(hof_prey[0])
-    save_tree("./graphs/prey_tree_grass2.txt", nodes, edges, labels)
+    save_tree("./graphs/prey_tree_grass3.txt", nodes, edges, labels)
     G = nx.Graph()
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
@@ -140,7 +140,7 @@ def decision_tree_prey():
     nx.draw_networkx_nodes(G, pos)
     nx.draw_networkx_edges(G, pos)
     nx.draw_networkx_labels(G, pos, new_labels, font_size=12)
-    plt.savefig("./graphs/prey_decision_tree2.png")
+    plt.savefig("./graphs/prey_decision_tree3.png")
     plt.show()
     plot_tree(nodes, edges, labels)
 
@@ -173,30 +173,30 @@ def decision_tree_predator():
 
 
 if __name__ == '__main__':
-    folder_path = "./map"
-    for filename in os.listdir(folder_path):
-        file_path = os.path.join(folder_path, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    # folder_path = "./map"
+    # for filename in os.listdir(folder_path):
+    #     file_path = os.path.join(folder_path, filename)
+    #     try:
+    #         if os.path.isfile(file_path) or os.path.islink(file_path):
+    #             os.unlink(file_path)
+    #         elif os.path.isdir(file_path):
+    #             shutil.rmtree(file_path)
+    #     except Exception as e:
+    #         print('Failed to delete %s. Reason: %s' % (file_path, e))
+    #
+    # prey_counts, pred_counts = show_behaviour(print_state=True, lotka_voltera_model=True, draw_grid=False)
 
-    prey_counts, pred_counts = show_behaviour(print_state=True, lotka_voltera_model=True, draw_grid=False)
-
-    # decision_tree_prey()
+    decision_tree_prey()
     # decision_tree_predator()
 
-    np.savez(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", prey=prey_counts, pred=pred_counts)
-    plt.figure()
-    plt.plot(range(len(prey_counts)), prey_counts, label='Preys')
-    plt.plot(range(len(pred_counts)), pred_counts, label='Predators')
-    plt.title("Population of preys and predators over time")
-    plt.xlabel("Time")
-    plt.ylabel("Population")
-    plt.yticks(range(0, max(prey_counts), 100))
-    plt.legend()
-    plt.savefig(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png")
-    plt.show()
+    # np.savez(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", prey=prey_counts, pred=pred_counts)
+    # plt.figure()
+    # plt.plot(range(len(prey_counts)), prey_counts, label='Preys')
+    # plt.plot(range(len(pred_counts)), pred_counts, label='Predators')
+    # plt.title("Population of preys and predators over time")
+    # plt.xlabel("Time")
+    # plt.ylabel("Population")
+    # plt.yticks(range(0, max(prey_counts), 100))
+    # plt.legend()
+    # plt.savefig(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png")
+    # plt.show()

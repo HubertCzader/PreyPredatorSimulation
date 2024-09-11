@@ -28,7 +28,7 @@ def run_simulation(prey_function, pred_function, print_state=False, draw_grid=Fa
     parser.add_argument('--preyDeathRate', default=Config.beta, type=int, help='Probability of dying due to predation')
     parser.add_argument('--preyRepRate', default=Config.alpha, type=int, help='Probability of giving birth by preys')
     parser.add_argument('--mPred', default=3, type=int, help='The time after which predators get hungry')
-    parser.add_argument('--mPrey', default=4, type=int, help='The time after which prey get hungry')
+    parser.add_argument('--mPrey', default=5, type=int, help='The time after which prey get hungry')
     parser.add_argument('--grassRepRate', default=0.25, type=int, help='Probability of giving birth')
     parser.add_argument('--totalNumIterations', default=Config.iterations, type=int)
 
