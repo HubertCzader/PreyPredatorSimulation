@@ -99,7 +99,12 @@ class Prey:
                 for dx, dy in von_neumann_neighborhood(r):
                     new_prey_location = [own_location[0] + dx, own_location[1] + dy]
                     if self.in_grid(matrix, new_prey_location):
-                        possible_locations.append(new_prey_location)
+                        # possible_locations.append(new_prey_location)
+                        central_point = (matrix.xDim // 2, matrix.yDim // 2)
+                        distance_from_center = abs(central_point[0] - new_prey_location[0]) + \
+                                               abs(central_point[1] - new_prey_location[1])
+                        weight = max(1, 20 - distance_from_center)
+                        possible_locations += [new_prey_location] * weight
             return random.choice(possible_locations), -1, 0
         return own_location, -1, 0
 
@@ -247,7 +252,7 @@ class Predator:
             if type(agent) is Prey:  # Not selected randomly at the moment, just eats the first prey in the list
                 r = random.random()
                 hunger_influence = sigmoid(self.lastAte, self.hunger_minimum, 2)
-                success_rate = hunger_influence * (1 - np.exp(-self.death_rate * self.lastAte * 12))
+                success_rate = hunger_influence * (1 - np.exp(-self.death_rate * self.lastAte * 10))
                 if r < success_rate:
                     self.lastAte = 0
                     return agent.ID
