@@ -193,7 +193,7 @@ if __name__ == '__main__':
     # decision_tree_prey()
     # decision_tree_predator()
 
-    np.savez(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", prey=prey_counts, pred=pred_counts)
+    # np.savez(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", prey=prey_counts, pred=pred_counts)
     plt.figure()
     plt.plot(range(len(prey_counts)), prey_counts, label='Preys')
     plt.plot(range(len(pred_counts)), pred_counts, label='Predators')
