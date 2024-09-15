@@ -123,7 +123,7 @@ def decision_tree_prey():
     cpu_count = multiprocessing.cpu_count()
     pool = multiprocessing.Pool(cpu_count)
     toolbox_prey = create_toolbox(pset_prey, pool, eval_prey)
-    pop_prey = toolbox_prey.population(n=50)
+    pop_prey = toolbox_prey.population(n=10)
     hof_prey = tools.HallOfFame(1)
     stats_prey = create_stats()
     _, logbook = algorithms.eaSimple(pop_prey, toolbox_prey, 0.7, 0.1, 10, stats_prey, halloffame=hof_prey)
@@ -172,23 +172,37 @@ def decision_tree_predator():
     plot_tree(nodes, edges, labels)
 
 
+def plot_fitness_prey():
+    cpu_count = multiprocessing.cpu_count()
+    pool = multiprocessing.Pool(cpu_count)
+    toolbox_prey = create_toolbox(pset_prey, pool, eval_prey)
+    pop_prey = toolbox_prey.population(n=10)
+    hof_prey = tools.HallOfFame(1)
+    stats_prey = create_stats()
+    _, logbook = algorithms.eaSimple(pop_prey, toolbox_prey, 0.7, 0.1, 10, stats_prey, halloffame=hof_prey)
+    plot_logbook(logbook)
+
+
+
 if __name__ == '__main__':
     prey_counts, pred_counts = show_behaviour(print_state=True, lotka_voltera_model=True, draw_grid=False)
     print(len(prey_counts))
 
+    # plot_fitness_prey()
+
     # decision_tree_prey()
     # decision_tree_predator()
 
-    # np.savez(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", prey=prey_counts, pred=pred_counts)
-    # plt.figure()
-    # plt.plot(range(len(prey_counts)), prey_counts, label='Preys')
-    # plt.plot(range(len(pred_counts)), pred_counts, label='Predators')
-    # plt.title("Population of preys and predators over time")
-    # plt.xlabel("Time")
-    # plt.ylabel("Population")
-    # plt.yticks(range(0, max(prey_counts), 100))
-    # plt.legend()
-    # plt.savefig(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png")
-    # plt.show()
+    np.savez(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}", prey=prey_counts, pred=pred_counts)
+    plt.figure()
+    plt.plot(range(len(prey_counts)), prey_counts, label='Preys')
+    plt.plot(range(len(pred_counts)), pred_counts, label='Predators')
+    plt.title("Population of preys and predators over time")
+    plt.xlabel("Time")
+    plt.ylabel("Population")
+    plt.yticks(range(0, max(prey_counts), 100))
+    plt.legend()
+    plt.savefig(f"results/{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.png")
+    plt.show()
 
 
