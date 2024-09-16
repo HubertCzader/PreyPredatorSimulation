@@ -84,7 +84,9 @@ def run_simulation(prey_function, pred_function, print_state=False, draw_grid=Fa
     if lotka_volterra:
         return preyV, predV
 
-    fitness = lambda values: sum([((i + 1) ** 2) * value / 400 for _, value in enumerate(values[-20:])])
+    # fitness = lambda values: sum([((i + 1) ** 2) * value / 400 for _, value in enumerate(values[-20:])])
+    fitness = lambda values: max(0, sum((i + 1) * value / 100 for _, value in enumerate(values[-20:])) / sum(range(1, 21)))
+
     return fitness(preyV), fitness(predV)
 
 

@@ -5,17 +5,30 @@ import matplotlib.pyplot as plt
 from FlowOperators import sequence2, sequence3, selector2, selector3, selector4, randomSelector2
 
 
+# def plot_logbook(logbook):
+#     min_values = logbook.select("min")
+#     max_values = logbook.select("max")
+#     avg_values = logbook.select("avg")
+#     std_values = logbook.select("std")
+#     epoch_values = np.arange(len(avg_values))
+#     plt.errorbar(epoch_values, avg_values, std_values, label="avg +- std", ls='none', capsize=3, fmt='o')
+#     plt.plot(epoch_values, min_values, "-o", label="min")
+#     plt.plot(epoch_values, max_values, "-o", label="max")
+#     plt.legend()
+#     plt.show()
+
 def plot_logbook(logbook):
     min_values = logbook.select("min")
     max_values = logbook.select("max")
     avg_values = logbook.select("avg")
     std_values = logbook.select("std")
     epoch_values = np.arange(len(avg_values))
-    plt.errorbar(epoch_values, avg_values, std_values, label="avg +- std", ls='none', capsize=3, fmt='o')
-    plt.plot(epoch_values, min_values, "-o", label="min")
-    plt.plot(epoch_values, max_values, "-o", label="max")
-    plt.legend()
-    plt.show()
+    fig, ax = plt.subplots()
+    ax.errorbar(epoch_values, avg_values, std_values, label="avg +- std", ls='none', capsize=3, fmt='o')
+    ax.plot(epoch_values, min_values, "-o", label="min")
+    ax.plot(epoch_values, max_values, "-o", label="max")
+    ax.legend()
+    return fig
 
 
 def plot_tree(nodes, edges, labels):

@@ -47,5 +47,5 @@ def generateModelPlot(result, time) -> None:
 
 if __name__ == "__main__":
     result = sp.integrate.odeint(rhs, init, t)
-    print(result[:, 0])
+    print(len(result[:, 0]))
     # generateModelPlot(result, t)
