@@ -118,7 +118,7 @@ def decision_tree_prey():
     stats_prey = create_stats()
     _, logbook = algorithms.eaSimple(pop_prey, toolbox_prey, 0.7, 0.1, 10, stats_prey, halloffame=hof_prey)
     nodes, edges, labels = gp.graph(hof_prey[0])
-    save_tree("./graphs/prey_tree2.txt", nodes, edges, labels)
+    save_tree("./graphs/prey_tree_grass3.txt", nodes, edges, labels)
     G = nx.Graph()
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
@@ -130,7 +130,7 @@ def decision_tree_prey():
     nx.draw_networkx_nodes(G, pos)
     nx.draw_networkx_edges(G, pos)
     nx.draw_networkx_labels(G, pos, new_labels, font_size=12)
-    plt.savefig("./graphs/prey_decision_tree2.png")
+    plt.savefig("./graphs/prey_decision_tree3.png")
     plt.show()
     plot_tree(nodes, edges, labels)
 
