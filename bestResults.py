@@ -1,4 +1,4 @@
-from GeneticProgramming import show_behaviour
+from main import show_behaviour
 from LotkaVolteraSolver import LotkaVolterra, generateModelPlot
 from SimulationConfig import Config
 from datetime import datetime

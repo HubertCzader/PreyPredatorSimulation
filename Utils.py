@@ -5,17 +5,54 @@ import matplotlib.pyplot as plt
 from FlowOperators import sequence2, sequence3, selector2, selector3, selector4, randomSelector2
 
 
+# def plot_logbook(logbook):
+#     min_values = logbook.select("min")
+#     max_values = logbook.select("max")
+#     avg_values = logbook.select("avg")
+#     std_values = logbook.select("std")
+#     epoch_values = np.arange(len(avg_values))
+#     plt.errorbar(epoch_values, avg_values, std_values, label="avg +- std", ls='none', capsize=3, fmt='o')
+#     plt.plot(epoch_values, min_values, "-o", label="min")
+#     plt.plot(epoch_values, max_values, "-o", label="max")
+#     plt.legend()
+#     plt.show()
+
 def plot_logbook(logbook):
     min_values = logbook.select("min")
     max_values = logbook.select("max")
     avg_values = logbook.select("avg")
     std_values = logbook.select("std")
     epoch_values = np.arange(len(avg_values))
-    plt.errorbar(epoch_values, avg_values, std_values, label="avg +- std", ls='none', capsize=3, fmt='o')
-    plt.plot(epoch_values, min_values, "-o", label="min")
-    plt.plot(epoch_values, max_values, "-o", label="max")
-    plt.legend()
-    plt.show()
+    fig, ax = plt.subplots()
+    ax.errorbar(epoch_values, avg_values, std_values, label="avg +- std", ls='none', capsize=3, fmt='o')
+    ax.plot(epoch_values, min_values, "-o", label="min")
+    ax.plot(epoch_values, max_values, "-o", label="max")
+    ax.legend()
+    return fig
+
+
+def plot_logbook_box(logbook):
+    # Wybieramy odpowiednie wartości
+    min_values = logbook.select("min")
+    max_values = logbook.select("max")
+    avg_values = logbook.select("avg")
+    std_values = logbook.select("std")
+    epoch_values = np.arange(len(avg_values))
+    lower_box = np.array(avg_values) - np.array(std_values)
+    upper_box = np.array(avg_values) + np.array(std_values)
+
+    fig, ax = plt.subplots()
+
+    ax.errorbar(epoch_values, avg_values, yerr=[np.array(avg_values) - np.array(min_values), np.array(max_values) - np.array(avg_values)], fmt='o',
+                color='black', ecolor='black', capsize=5, label='min to max', zorder=1)
+    ax.vlines(epoch_values, lower_box, upper_box, color='dodgerblue', lw=8, alpha=0.6, label='avg ± std', zorder=2)
+    ax.plot(epoch_values, avg_values, 'o', color='#1C39BB', label='avg', zorder=3)
+
+    ax.set_xlabel('Generation')
+    ax.set_ylabel('Fitness value')
+    ax.legend(loc='lower right')
+
+    return fig
 
 
 def plot_tree(nodes, edges, labels):
