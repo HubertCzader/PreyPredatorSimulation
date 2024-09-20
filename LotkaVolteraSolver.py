@@ -4,15 +4,17 @@ import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
 from typing import List
 
+from SimulationConfig import Config
+
 # Initial values:
 x0 = 300  # starting population of preys
 y0 = 100  # starting population of predators
 init = [x0, y0]
 
-alpha = 0.7  # natural growth rate of preys
-beta = 0.01  # death rate per encounter of preys due to predation
-gamma = 0.001  # natural death rate of predators in the absence of food
-delta = 0.5  # natural growth rate of predators
+alpha = Config.alpha  # natural growth rate of preys
+beta = Config.beta  # death rate per encounter of preys due to predation
+gamma = Config.gamma  # natural death rate of predators in the absence of food
+delta = Config.delta  # natural growth rate of predators
 
 t = np.linspace(0, 1001, 1001)
 

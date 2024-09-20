@@ -9,7 +9,7 @@ from datetime import datetime
 from Simulation import run_simulation, fitness_function
 from LotkaVoltera import lotka_volterra
 from TreeUtils import simplify_tree
-from Utils import create_pset, create_pset_pred, create_stats, create_toolbox, plot_logbook, plot_tree
+from Utils import create_pset, create_pset_pred, create_stats, create_toolbox, plot_logbook, plot_tree, plot_logbook_box
 from TreeUtils import save_tree
 
 PREY_TERMINALS = [
@@ -164,10 +164,13 @@ def plot_fitness_prey(population):
     hof_prey = tools.HallOfFame(1)
     stats_prey = create_stats()
     _, logbook = algorithms.eaSimple(pop_prey, toolbox_prey, 0.5, 0.2, 20, stats_prey, halloffame=hof_prey)
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M")
     fig = plot_logbook(logbook)
     plt.show()
-    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M")
     fig.savefig(f"./gp_results/prey_fitness_{population}_{current_time}.png")
+    box = plot_logbook_box(logbook)
+    plt.show()
+    box.savefig(f"./gp_results/prey_box_{population}_{current_time}.png")
     nodes, edges, labels = gp.graph(hof_prey[0])
     save_tree(f"./gp_results/prey_tree_{population}_{current_time}.txt", nodes, edges, labels)
     G = nx.Graph()
@@ -184,6 +187,8 @@ def plot_fitness_prey(population):
     plt.savefig(f"./gp_results/prey_tree_{population}_{current_time}.png")
     plt.show()
     plot_tree(nodes, edges, labels)
+    pool.close()
+    pool.join()
 
 
 def plot_fitness_predator(population):
@@ -195,10 +200,13 @@ def plot_fitness_predator(population):
     stats_predator = create_stats()
     _, logbook = algorithms.eaSimple(pop_predator, toolbox_predator, 0.5, 0.2, 20, stats_predator,
                                      halloffame=hof_predator)
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M")
     fig = plot_logbook(logbook)
     plt.show()
-    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M")
     fig.savefig(f"./gp_results/predator_fitness_{population}_{current_time}.png")
+    box = plot_logbook_box(logbook)
+    plt.show()
+    box.savefig(f"./gp_results/predator_box_{population}_{current_time}.png")
     nodes, edges, labels = gp.graph(hof_predator[0])
     save_tree(f"./gp_results/predator_tree_{population}_{current_time}.txt", nodes, edges, labels)
     G = nx.Graph()
@@ -215,16 +223,20 @@ def plot_fitness_predator(population):
     plt.savefig(f"./gp_results/predator_tree_{population}_{current_time}.png")
     plt.show()
     plot_tree(nodes, edges, labels)
+    pool.close()
+    pool.join()
 
 
 if __name__ == "__main__":
-    for i in range(5):
-        print(f"Run {i+1}\n")
-        for n in [10, 20, 50]:
-            plot_fitness_prey(n)
+    # for i in range(3):
+    #     print(f"Run {i+1}\n")
+        # for n in [20]:
+        #     plot_fitness_prey(n)
 
-        for n in [10, 20, 50]:
-            plot_fitness_predator(n)
+    plot_fitness_prey(50)
+
+        # for n in [50, 20, 10]:
+        #     plot_fitness_predator(n)
 
     # decision_tree_prey()
     # decision_tree_predator()
