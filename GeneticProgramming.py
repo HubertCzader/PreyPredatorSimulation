@@ -233,7 +233,7 @@ if __name__ == "__main__":
         # for n in [20]:
         #     plot_fitness_prey(n)
 
-    plot_fitness_prey(50)
+    plot_fitness_predator(20)
 
         # for n in [50, 20, 10]:
         #     plot_fitness_predator(n)
